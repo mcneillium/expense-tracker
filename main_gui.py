@@ -10,13 +10,8 @@ from datetime import datetime
 # CSV file path
 csv_file = 'expenses.csv'
 
-# Currency conversion rates
-conversion_rates = {
-    "£": 1.00,
-    "$": 0.75,  # Example rate, 1 USD = 0.75 GBP
-    "€": 0.85,  # Example rate, 1 EUR = 0.85 GBP
-    "¥": 0.0055  # Example rate, 1 JPY = 0.0055 GBP
-}
+# Currency conversion rates (fixed examples), shared with the tests
+from money import CONVERSION_RATES as conversion_rates, amount_to_gbp, totals_by_category
 
 # Initialize the CSV file with the necessary columns if it doesn't exist
 def initialize_csv():
@@ -69,12 +64,9 @@ def update_summary():
     if os.path.exists(csv_file):
         df = pd.read_csv(csv_file)
         for _, row in df.iterrows():
-            currency_symbol = row['Amount'][0]
-            if currency_symbol in conversion_rates:
-                amount = float(row['Amount'][1:])
-                amount_in_gbp = amount * conversion_rates[currency_symbol]
-                total_gbp += amount_in_gbp
-            else:
+            try:
+                total_gbp += amount_to_gbp(row['Amount'])
+            except ValueError:
                 messagebox.showwarning("Currency Error", f"Unrecognized currency symbol in entry: {row['Amount']}")
                 continue
 
@@ -87,7 +79,8 @@ def plot_expenses_gui():
         if df.empty:
             messagebox.showinfo("No Data", "No expenses to plot.")
             return
-        category_totals = df.groupby('Category')['Amount'].apply(lambda x: x.str[1:].astype(float).sum())
+        # Convert every amount to pounds first; summing the raw numbers mixed currencies.
+        category_totals = totals_by_category(df)
         category_totals.plot(kind='bar')
         plt.title('Total Spending by Category')
         plt.xlabel('Category')

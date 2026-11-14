@@ -1,6 +1,10 @@
 
 # Personal Expense Tracker
 
+[![tests](https://github.com/mcneillium/expense-tracker/actions/workflows/tests.yml/badge.svg)](https://github.com/mcneillium/expense-tracker/actions/workflows/tests.yml)
+
+Case study: [paulmartinmcneill.com/projects/expense-tracker](https://paulmartinmcneill.com/projects/expense-tracker/)
+
 ## Overview
 The Personal Expense Tracker is a user-friendly application designed to help individuals track their daily expenses, categorize them, and visualize spending habits. It is ideal for those who want to manage their finances more effectively by keeping a record of where their money goes.
 
@@ -52,6 +56,22 @@ The Personal Expense Tracker is a user-friendly application designed to help ind
 3. **Deleting Expenses**: Select an expense from the table and click "Delete Expense" to remove it. Click "Delete All Expenses" to clear the entire list.
 4. **Visualizing Spending**: Click "Plot Expenses" to generate a bar chart showing your spending by category.
 5. **Clearing the Form**: Click "Clear Form" to reset the input fields.
+
+## Tests
+```bash
+pip install pandas pytest
+python -m pytest -q
+```
+The currency conversion and the per-category chart totals are tested, and the
+tests run on every push. Conversion rates are fixed examples in `money.py`,
+not live exchange rates.
+
+## Changes (November 2026)
+- The spending chart now converts every amount to pounds before adding them
+  up; it used to add dollars, euros and yen to pounds as if they were the same.
+- `requirements.txt` now lists what the app actually uses (it was missing
+  `tkcalendar` and listed Flask and Plotly, which are not used).
+- The committed `venv/` folder (about 38,000 files) is no longer tracked.
 
 ## Contribution
 Contributions are welcome! Please feel free to submit a pull request or open an issue if you have suggestions or find any bugs.
