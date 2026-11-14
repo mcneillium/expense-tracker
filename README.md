@@ -37,7 +37,7 @@ The Personal Expense Tracker is a user-friendly application designed to help ind
 2. **Create a Virtual Environment** (Optional but recommended):
    ```bash
    python -m venv env
-   source env/bin/activate  # On Windows use `env\Scriptsctivate`
+   source env/bin/activate      # Windows: env\Scripts\activate
    ```
 
 3. **Install Required Dependencies**:
