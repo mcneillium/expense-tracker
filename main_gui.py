@@ -12,17 +12,11 @@ csv_file = 'expenses.csv'
 
 # Currency conversion rates (fixed examples), shared with the tests
 from money import CONVERSION_RATES as conversion_rates, amount_to_gbp, totals_by_category
+import store
 
-# Initialize the CSV file with the necessary columns if it doesn't exist
+# Create the CSV file with the right columns if it is missing or malformed
 def initialize_csv():
-    if not os.path.exists(csv_file):
-        df = pd.DataFrame(columns=['Date', 'Category', 'Amount', 'Description'])
-        df.to_csv(csv_file, index=False)
-    else:
-        df = pd.read_csv(csv_file)
-        if set(['Date', 'Category', 'Amount', 'Description']).issubset(df.columns) == False:
-            df = pd.DataFrame(columns=['Date', 'Category', 'Amount', 'Description'])
-            df.to_csv(csv_file, index=False)
+    store.ensure(csv_file)
 
 # Add a new expense to the CSV file and update the display
 def add_expense():
@@ -52,9 +46,10 @@ def load_expenses():
         expenses_list.delete(item)
 
     if os.path.exists(csv_file):
-        df = pd.read_csv(csv_file)
-        for _, row in df.iterrows():
-            expenses_list.insert('', tk.END, values=row.tolist())
+        df = store.load(csv_file)
+        for idx, row in df.iterrows():
+            # The row number is the item's id, so a delete removes exactly this row.
+            expenses_list.insert('', tk.END, iid=str(idx), values=row.tolist())
 
     update_summary()
 
@@ -81,7 +76,7 @@ def plot_expenses_gui():
             return
         # Convert every amount to pounds first; summing the raw numbers mixed currencies.
         category_totals = totals_by_category(df)
-        category_totals.plot(kind='bar')
+        category_totals.plot(kind='bar', rot=0)
         plt.title('Total Spending by Category')
         plt.xlabel('Category')
         plt.ylabel('Total Amount (£)')
@@ -96,19 +91,7 @@ def delete_expense():
         messagebox.showwarning("Selection Error", "Please select an expense to delete.")
         return
 
-    # Get selected item details
-    item = expenses_list.item(selected_item)
-    values = item['values']
-
-    # Load existing data
-    df = pd.read_csv(csv_file)
-
-    # Remove the selected row
-    df = df[~((df['Date'] == values[0]) & (df['Category'] == values[1]) & 
-              (df['Amount'] == values[2]) & (df['Description'] == values[3]))]
-
-    # Save the updated DataFrame back to the CSV
-    df.to_csv(csv_file, index=False)
+    store.drop_row(csv_file, int(selected_item[0]))
 
     # Refresh the Treeview
     load_expenses()
@@ -118,8 +101,8 @@ def delete_expense():
 # Delete all expenses from the CSV file and update the display
 def delete_all_expenses():
     if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete all expenses?"):
-        # Clear the CSV file
-        initialize_csv()
+        # Clear the CSV file (keeping the header row)
+        store.reset(csv_file)
         # Refresh the Treeview
         load_expenses()
         messagebox.showinfo("Success", "All expenses have been deleted.")
@@ -144,11 +127,7 @@ def center_window(root):
 # Set up the main window
 root = tk.Tk()
 root.title("Expense Tracker by Paul Martin McNeill")
-root.geometry("800x650")
-root.resizable(False, False)
-
-# Center the window
-center_window(root)
+# The window sizes itself to its contents (a fixed 800x650 window hid the total).
 
 # Set a style for the widgets
 style = ttk.Style(root)
@@ -203,9 +182,10 @@ delete_all_button.grid(row=6, column=3, padx=10, pady=10)
 
 # Expense list (Treeview)
 columns = ("Date", "Category", "Amount", "Description")
-expenses_list = ttk.Treeview(root, columns=columns, show="headings")
+expenses_list = ttk.Treeview(root, columns=columns, show="headings", height=10)
 for col in columns:
     expenses_list.heading(col, text=col)
+    expenses_list.column(col, width=230 if col == "Description" else 150)
 expenses_list.grid(row=7, column=0, columnspan=5, padx=10, pady=10, sticky="nsew")
 
 # Summary
@@ -215,6 +195,7 @@ summary_label.grid(row=8, column=0, columnspan=5, padx=10, pady=20)
 # Initialize the CSV file and load the expenses
 initialize_csv()
 load_expenses()
+center_window(root)
 
 # Start the main loop
 root.mainloop()

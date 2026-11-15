@@ -5,6 +5,8 @@
 
 Case study: [paulmartinmcneill.com/projects/expense-tracker](https://paulmartinmcneill.com/projects/expense-tracker/)
 
+![The expense tracker with six expenses in three currencies](docs/screenshot.png)
+
 ## Overview
 The Personal Expense Tracker is a user-friendly application designed to help individuals track their daily expenses, categorize them, and visualize spending habits. It is ideal for those who want to manage their finances more effectively by keeping a record of where their money goes.
 
@@ -62,11 +64,17 @@ The Personal Expense Tracker is a user-friendly application designed to help ind
 pip install pandas pytest
 python -m pytest -q
 ```
-The currency conversion and the per-category chart totals are tested, and the
+The currency conversion, the per-category chart totals and the file operations (delete one, delete all) are tested, and the
 tests run on every push. Conversion rates are fixed examples in `money.py`,
 not live exchange rates.
 
 ## Changes (November 2026)
+- **Delete All Expenses** now empties the file. Before, it only recreated the
+  file when it was missing, so nothing was deleted.
+- **Delete Expense** removes exactly the selected row. Before, it matched on the
+  row's values, so deleting one of two identical expenses deleted both.
+- The window sizes itself to its contents; the fixed 800x650 window hid the
+  total. File handling lives in `store.py`, with its own tests.
 - The spending chart now converts every amount to pounds before adding them
   up; it used to add dollars, euros and yen to pounds as if they were the same.
 - `requirements.txt` now lists what the app actually uses (it was missing
