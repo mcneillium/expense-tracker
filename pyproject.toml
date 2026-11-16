@@ -1,0 +1,33 @@
+[project]
+name = "expense-tracker"
+version = "1.2.0"
+description = "A Tkinter app that logs expenses in four currencies to a CSV file and charts spending in pounds."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = ["matplotlib>=3.11", "pandas>=3.1", "tkcalendar>=1.6"]
+
+[dependency-groups]
+dev = ["mypy>=2.4", "pandas-stubs>=3", "pytest>=9", "ruff>=0.17"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import order, modern-syntax upgrades, likely bugs, simplifications
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# Line length is left to the formatter; long GUI strings are not worth wrapping by hand.
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+# The money and file-handling modules are fully typed; the Tkinter GUI is not checked.
+files = ["money.py", "store.py"]
+strict = true

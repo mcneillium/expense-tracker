@@ -2,7 +2,9 @@ import store
 
 
 def write(path, rows):
-    path.write_text("Date,Category,Amount,Description\n" + "".join(r + "\n" for r in rows), encoding="utf-8")
+    path.write_text(
+        "Date,Category,Amount,Description\n" + "".join(r + "\n" for r in rows), encoding="utf-8"
+    )
 
 
 def test_reset_empties_an_existing_file(tmp_path):
@@ -17,7 +19,14 @@ def test_reset_empties_an_existing_file(tmp_path):
 def test_drop_row_removes_only_the_selected_duplicate(tmp_path):
     # Before the fix both identical rows were deleted.
     f = tmp_path / "expenses.csv"
-    write(f, ["2024-08-25,Transport,£2.00,Taxi", "2024-08-25,Transport,£2.00,Taxi", "2024-08-26,Food,£5.00,100"])
+    write(
+        f,
+        [
+            "2024-08-25,Transport,£2.00,Taxi",
+            "2024-08-25,Transport,£2.00,Taxi",
+            "2024-08-26,Food,£5.00,100",
+        ],
+    )
     df = store.drop_row(f, 0)
     assert len(df) == 2
     assert df.iloc[0]["Description"] == "Taxi"

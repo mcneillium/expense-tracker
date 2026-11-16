@@ -30,27 +30,14 @@ The Personal Expense Tracker is a user-friendly application designed to help ind
   - **ttk**: For enhanced widget styling in the interface.
 
 ## Installation
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/mcneillium/expense-tracker.git
-   cd expense-tracker
-   ```
+You need [uv](https://docs.astral.sh/uv/), which fetches the right Python (3.13
+or later, with Tkinter included) and every dependency from the lock file.
 
-2. **Create a Virtual Environment** (Optional but recommended):
-   ```bash
-   python -m venv env
-   source env/bin/activate      # Windows: env\Scripts\activate
-   ```
-
-3. **Install Required Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the Application**:
-   ```bash
-   python main_gui.py
-   ```
+```bash
+git clone https://github.com/mcneillium/expense-tracker.git
+cd expense-tracker
+uv run main_gui.py
+```
 
 ## Usage
 1. **Adding Expenses**: Enter the date, category, amount, currency, and a brief description of the expense, then click "Add Expense".
@@ -61,8 +48,8 @@ The Personal Expense Tracker is a user-friendly application designed to help ind
 
 ## Tests
 ```bash
-pip install pandas pytest
-python -m pytest -q
+uv run pytest     # the tests
+uv run mypy       # the type check
 ```
 The currency conversion, the per-category chart totals and the file operations (delete one, delete all) are tested, and the
 tests run on every push. Conversion rates are fixed examples in `money.py`,
@@ -80,6 +67,19 @@ not live exchange rates.
 - `requirements.txt` now lists what the app actually uses (it was missing
   `tkcalendar` and listed Flask and Plotly, which are not used).
 - The committed `venv/` folder (about 38,000 files) is no longer tracked.
+
+### Second round (November 2026): exact money and current tooling
+- **Money is held as `Decimal`, not `float`**, so totals are exact to the
+  penny (in floating point, 0.10 + 0.20 is 0.30000000000000004).
+- The amount box now refuses `nan`, `inf`, zero and negative numbers. Before,
+  typing `nan` saved an expense of "£nan".
+- **uv** manages Python and the dependencies from one `pyproject.toml` and a
+  lock file, replacing `requirements.txt`. **Ruff** lints and formats, and
+  **mypy** checks the money and file-handling modules in strict mode.
+- Tests went from 6 to 14 and run on **Python 3.13, 3.14 and 3.15**. Dependabot
+  proposes updates once a month.
+- Removed `expense_tracker.py`, an unused first draft that still added
+  different currencies together.
 
 ## Contribution
 Contributions are welcome! Please feel free to submit a pull request or open an issue if you have suggestions or find any bugs.
